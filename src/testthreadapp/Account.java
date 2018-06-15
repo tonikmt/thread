@@ -50,22 +50,22 @@ public class Account {
         this.lock = new ReentrantLock();
     }
     
-    public void withdraw (int amount) {
-        System.out.println("start withdraw");
-        System.out.println("withdraw balance before: " + this.balance);
-        System.out.println("withdraw amount: " + amount);
+    public void withdraw (int amount, int id) {
+        System.out.println("Thread id: " + id + " --- start withdraw");
+        System.out.println("Thread id: " + id + " --- withdraw balance before: " + this.balance);
+        System.out.println("Thread id: " + id + " --- withdraw amount: " + amount);
         balance -= amount;
-        System.out.println("withdraw balance after: " + this.balance);
-        System.out.println("stop withdraw");
+        System.out.println("Thread id: " + id + " --- withdraw balance after: " + this.balance);
+        System.out.println("Thread id: " + id + " --- stop withdraw");
     }
     
-    public void deposit (int amount) {
-        System.out.println("start deposit");
-        System.out.println("deposit balance before: " + this.balance);
-        System.out.println("deposit amount: " + amount);
+    public void deposit (int amount, int id) {
+        System.out.println("Thread id: " + id + " --- start deposit");
+        System.out.println("Thread id: " + id + " --- deposit balance before: " + this.balance);
+        System.out.println("Thread id: " + id + " --- deposit amount: " + amount);
         balance += amount;
-        System.out.println("deposit balance after: " + this.balance);
-        System.out.println("stop deposit");
+        System.out.println("Thread id: " + id + " --- deposit balance after: " + this.balance);
+        System.out.println("Thread id: " + id + " --- stop deposit");
     }
     
 }

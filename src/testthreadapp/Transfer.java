@@ -30,10 +30,9 @@ public class Transfer implements Callable<Boolean> {
     @Override
     public Boolean call() throws Exception {
         System.out.println("Старт потока: " + id);
-        System.out.println("параметры потока " + id + ": " + "accountFrom: " + accountFrom.toString() + " accountTo: " + accountTo + " amount: " + amount);
 
         try {
-            if (accountFrom.getBalance() < amount) {
+            if (this.accountFrom.getBalance() < this.amount) {
                 System.out.println("Поток: " + id + " --- InsufficientFundsException");
                 throw new InsufficientFundsException("Сумма списания больше суммы счета!");
             }
@@ -42,35 +41,38 @@ public class Transfer implements Callable<Boolean> {
             Thread.currentThread().interrupt();
         }
 
-        if (accountFrom.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {
+        if (this.accountFrom.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {
             try {
                 System.out.println("Поток: " + id + " --- получили Lock на accountFrom: " + accountFrom.toString());
-                if (accountTo.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {
+                System.out.println("параметры потока " + id + ": " + "accountFrom: " + accountFrom.toString() + " amount: " + amount);
+                if (this.accountTo.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {
                     try {
                         System.out.println("Поток: " + id + " --- получили Lock на accountTo: " + accountTo.toString());
+                        System.out.println("параметры потока " + id + ": " + " accountTo: " + accountTo.toString() + " amount: " + amount);
                         System.out.println("Поток: " + id + " --- выполняем withdraw и deposit");
-                        accountFrom.withdraw(amount);
-                        accountTo.deposit(amount);
+                        this.accountFrom.withdraw(amount, id);
+                        this.accountTo.deposit(amount, id);
                         Thread.sleep(new Random().nextInt(3000));
                         return true;
+
                     } finally {
                         System.out.println("Поток: " + id + " --- освобождаем accountTo");
-                        accountTo.getLock().unlock();
+                        this.accountTo.getLock().unlock();
                     }
 
                 } else {
                     System.out.println("Поток: " + id + " --- объект accountTo занят!");
-                    accountTo.incFailedTransferCount();
+                    this.accountTo.incFailedTransferCount();
                     System.out.println("Поток: " + id + " --- accountTo.getFailCounter(): " + accountTo.getFailCounter().get());
                     return false;
                 }
             } finally {
                 System.out.println("Поток: " + id + " --- освобождаем accountFrom");
-                accountFrom.getLock().unlock();
+                this.accountFrom.getLock().unlock();
             }
         } else {
             System.out.println("Поток: " + id + " --- объект accountFrom занят!");
-            accountFrom.incFailedTransferCount();
+            this.accountFrom.incFailedTransferCount();
             System.out.println("Поток: " + id + " --- accountFrom.getFailCounter(): " + accountFrom.getFailCounter().get());
             return false;
         }
