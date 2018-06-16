@@ -25,7 +25,7 @@ public class Operations2 {
         Account acc2 = new Account(new Random().nextInt(5000));
         List<Future> list = new ArrayList<>();
         ExecutorService service = Executors.newFixedThreadPool(3);
-        for (int i=0;i<10;i++) {
+        for (int i=0;i<100;i++) {
             list.add(service.submit(
                     new Random().nextBoolean()?
                             new Transfer(acc1, acc2, new Random().nextInt(1000) , i):
@@ -33,7 +33,7 @@ public class Operations2 {
         }
         service.shutdown();
         
-        if (service.awaitTermination(20, TimeUnit.SECONDS)) {
+        if (service.awaitTermination(2, TimeUnit.MINUTES)) {
             System.out.println("Результат выполнения всех потоков: ");
             list.forEach((f) -> {
                 try {
