@@ -15,10 +15,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class Transfer implements Callable<Boolean> {
 
-    private Account accountFrom;
-    private Account accountTo;
-    private int amount;
-    private int id;
+    private final Account accountFrom;
+    private final Account accountTo;
+    private final int amount;
+    private final int id;
 
     public Transfer(Account accountFrom, Account accountTo, int amount, int id) {
         this.accountFrom = accountFrom;
@@ -38,7 +38,8 @@ public class Transfer implements Callable<Boolean> {
             }
         } catch (InsufficientFundsException e) {
             System.out.println("InsufficientFundsException потока: " + id + " --- останавливаем поток!");
-            Thread.currentThread().interrupt();
+            return false;
+            //Thread.currentThread().interrupt();
         }
 
         if (this.accountFrom.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {

@@ -21,18 +21,21 @@ import java.util.concurrent.TimeUnit;
 public class Operations2 {
     public static void main(String[] args) throws InterruptedException, ExecutionException, InsufficientFundsException {
         
-        Account acc1 = new Account(1000);
-        Account acc2 = new Account(4000);
-        List<Future> list = new ArrayList<Future>();
+        Account acc1 = new Account(new Random().nextInt(5000));
+        Account acc2 = new Account(new Random().nextInt(5000));
+        List<Future> list = new ArrayList<>();
         ExecutorService service = Executors.newFixedThreadPool(3);
         for (int i=0;i<10;i++) {
-            list.add(service.submit(new Transfer(acc1, acc2, new Random().nextInt(1000) , i)));
+            list.add(service.submit(
+                    new Random().nextBoolean()?
+                            new Transfer(acc1, acc2, new Random().nextInt(1000) , i):
+                            new Transfer(acc2, acc1, new Random().nextInt(1000) , i)));
         }
         service.shutdown();
         
         if (service.awaitTermination(20, TimeUnit.SECONDS)) {
             System.out.println("Результат выполнения всех потоков: ");
-            for (Future f : list) {
+            list.forEach((f) -> {
                 try {
                     System.out.println("Future get(): " + f.get().toString());
                 } catch (ExecutionException e) {
@@ -40,8 +43,7 @@ public class Operations2 {
                 } catch (InterruptedException e) {
                     System.out.println("InterruptedException  e: "+ e.getMessage());
                 }
-                
-            }
+            });
             System.out.println("acc1: " + acc1.toString());
             System.out.println("acc2: " + acc2.toString());
         }
