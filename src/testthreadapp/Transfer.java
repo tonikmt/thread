@@ -7,6 +7,7 @@ package testthreadapp;
 
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,17 +20,21 @@ public class Transfer implements Callable<Boolean> {
     private final Account accountTo;
     private final int amount;
     private final int id;
+    private final CountDownLatch cdl;
 
-    public Transfer(Account accountFrom, Account accountTo, int amount, int id) {
+    public Transfer(Account accountFrom, Account accountTo, int amount, int id, CountDownLatch cdl) {
         this.accountFrom = accountFrom;
         this.accountTo = accountTo;
         this.amount = amount;
         this.id = id;
+        this.cdl = cdl;
     }
 
     @Override
     public Boolean call() throws Exception {
         System.out.println("Старт потока: " + id);
+        cdl.countDown();
+        cdl.await();
 
         try {
             if (this.accountFrom.getBalance() < this.amount) {
@@ -42,11 +47,11 @@ public class Transfer implements Callable<Boolean> {
             //Thread.currentThread().interrupt();
         }
 
-        if (this.accountFrom.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {
+        if (this.accountFrom.getLock().tryLock(new Random().nextInt(5), TimeUnit.SECONDS)) {
             try {
                 System.out.println("Поток: " + id + " --- получили Lock на accountFrom: " + accountFrom.toString());
                 System.out.println("параметры потока " + id + ": " + "accountFrom: " + accountFrom.toString() + " amount: " + amount);
-                if (this.accountTo.getLock().tryLock(new Random().nextInt(3), TimeUnit.SECONDS)) {
+                if (this.accountTo.getLock().tryLock(new Random().nextInt(5), TimeUnit.SECONDS)) {
                     try {
                         System.out.println("Поток: " + id + " --- получили Lock на accountTo: " + accountTo.toString());
                         System.out.println("параметры потока " + id + ": " + " accountTo: " + accountTo.toString() + " amount: " + amount);
